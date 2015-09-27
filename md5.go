@@ -1,21 +1,24 @@
 package md5
+
 import (
-	"math"
 	"fmt"
+	"math"
 )
 
 const (
-	DigestBufLen int = 4
-	WorkBufLen   int = 16
+	DigestBufLen int  = 4
+	WorkBufLen   int  = 16
 	MsgBlockLen  uint = 64
 )
 
 var (
 	K [64]uint32
-	h [4]uint32 = [4]uint32 {
-					0xefcdab89,
-					0x98badcfe,
-					0x10325476,}
+	h [4]uint32 = [4]uint32{
+		0x67452301,
+		0xefcdab89,
+		0x98badcfe,
+		0x10325476}
+
 )
 
 func appendZeros(block [MsgBlockLen]uint8, i, l uint) [MsgBlockLen]uint8 {
@@ -40,9 +43,9 @@ func processMsgBlock(block [MsgBlockLen]uint8) {
 	var ki uint32 = 0
 	for xi < 16 {
 		x[xi] = (uint32(m[mi]) |
-		(uint32(m[mi+1]) << 8) |
-		(uint32(m[mi+2]) << 16) |
-		(uint32(m[mi+3]) << 24))
+			(uint32(m[mi+1]) << 8) |
+			(uint32(m[mi+2]) << 16) |
+			(uint32(m[mi+3]) << 24))
 		xi += 1
 		mi += 4
 	}
@@ -56,13 +59,13 @@ func processMsgBlock(block [MsgBlockLen]uint8) {
 	// F(X, Y, Z) = XY v not(X) Z
 	i := 0
 	for i < 16 {
-		a = b + leftRotate(7, a + ((b & c) | (^b & d) + x[i] + K[i]))
+		a = b + leftRotate(7, a+((b&c)|(^b&d)+x[i]+K[i]))
 		i += 1
-		d = a + leftRotate(12, d + ((a & b) | (^a & c) + x[i] + K[i]))
+		d = a + leftRotate(12, d+((a&b)|(^a&c)+x[i]+K[i]))
 		i += 1
-		c = d + leftRotate(17, c + ((d & a) | (^d & b) + x[i] + K[i]))
+		c = d + leftRotate(17, c+((d&a)|(^d&b)+x[i]+K[i]))
 		i += 1
-		b = c + leftRotate(22, a + ((c & d) | (^c & a) + x[i] + K[i]))
+		b = c + leftRotate(22, a+((c&d)|(^c&a)+x[i]+K[i]))
 		i += 1
 	}
 
@@ -71,13 +74,13 @@ func processMsgBlock(block [MsgBlockLen]uint8) {
 	xi = 1
 	ki = 16
 	for ki < 32 {
-		a = b + leftRotate( 5, a + ((b & d) | (c & ^d)) + x[xi] + K[ki])
+		a = b + leftRotate(5, a+((b&d)|(c & ^d))+x[xi]+K[ki])
 		xi = (xi + 5) & 0xf
-		d = a + leftRotate( 9, d + ((a & c) | (b & ^c)) + x[xi] + K[ki+1])
+		d = a + leftRotate(9, d+((a&c)|(b & ^c))+x[xi]+K[ki+1])
 		xi = (xi + 5) & 0xf
-		c = d + leftRotate(14, c + ((d & b) | (a & ^b)) + x[xi] + K[ki+2])
+		c = d + leftRotate(14, c+((d&b)|(a & ^b))+x[xi]+K[ki+2])
 		xi = (xi + 5) & 0xf
-		b = c + leftRotate(20, b + ((c & a) | (d & ^a)) + x[xi] + K[ki+3])
+		b = c + leftRotate(20, b+((c&a)|(d & ^a))+x[xi]+K[ki+3])
 		xi = (xi + 5) & 0xf
 		ki += 4
 	}
@@ -86,28 +89,28 @@ func processMsgBlock(block [MsgBlockLen]uint8) {
 	// H(X,Y,Z) = X xor Y xor Z
 	xi = 5
 	for ki < 48 {
-		a = b + leftRotate( 4, a + (b ^ c ^ d) + x[xi] + K[ki])
+		a = b + leftRotate(4, a+(b^c^d)+x[xi]+K[ki])
 		xi = (xi + 3) & 0xf
-		d = a + leftRotate(11, d + (a ^ b ^ c) + x[xi] + K[ki+1])
+		d = a + leftRotate(11, d+(a^b^c)+x[xi]+K[ki+1])
 		xi = (xi + 3) & 0xf
-		c = d + leftRotate(16, c + (d ^ a ^ b) + x[xi] + K[ki+2])
+		c = d + leftRotate(16, c+(d^a^b)+x[xi]+K[ki+2])
 		xi = (xi + 3) & 0xf
-		b = c + leftRotate(23, b + (c ^ d ^ a) + x[xi] + K[ki+3])
+		b = c + leftRotate(23, b+(c^d^a)+x[xi]+K[ki+3])
 		xi = (xi + 3) & 0xf
 		ki += 4
 	}
 
 	// Round 4
 	// I(X,Y,Z) = Y xor (X v not(Z))
-	xi = 0;
+	xi = 0
 	for ki < 64 {
-		a = b + leftRotate( 6, a + (c ^ (b | ^d)) + x[xi] + K[ki])
+		a = b + leftRotate(6, a+(c^(b|^d))+x[xi]+K[ki])
 		xi = (xi + 7) & 0xf
-		d = a + leftRotate(10, d + (b ^ (a | ^c)) + x[xi] + K[ki+1])
+		d = a + leftRotate(10, d+(b^(a|^c))+x[xi]+K[ki+1])
 		xi = (xi + 7) & 0xf
-		c = d + leftRotate(15, c + (a ^ (d | ^b)) + x[xi] + K[ki+2])
+		c = d + leftRotate(15, c+(a^(d|^b))+x[xi]+K[ki+2])
 		xi = (xi + 7) & 0xf
-		b = c + leftRotate(21, b + (d ^ (c | ^a)) + x[xi] + K[ki+3])
+		b = c + leftRotate(21, b+(d^(c|^a))+x[xi]+K[ki+3])
 		xi = (xi + 7) & 0xf
 		ki += 4
 	}
@@ -168,11 +171,11 @@ func Md5(input string) string {
 	out := ""
 	for i < 4 {
 		w := h[i]
-		res[ri]	    = uint8(w & 0xff)
-		res[ri+1]	= uint8(w >> 8 & 0xff)
-		res[ri+2]	= uint8(w >> 16 & 0xff)
-		res[ri+3]	= uint8(w >> 24)
-		out += fmt.Sprintf("%x%x%x%x",res[ri],res[ri+1],res[ri+2],res[ri+3])
+		res[ri] = uint8(w & 0xff)
+		res[ri+1] = uint8(w >> 8 & 0xff)
+		res[ri+2] = uint8(w >> 16 & 0xff)
+		res[ri+3] = uint8(w >> 24)
+		out += fmt.Sprintf("%x%x%x%x", res[ri], res[ri+1], res[ri+2], res[ri+3])
 		i += 1
 		ri += 4
 	}

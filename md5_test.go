@@ -1,4 +1,5 @@
 package md5
+
 import (
 	"fmt"
 	"testing"
