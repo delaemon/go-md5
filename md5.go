@@ -52,10 +52,22 @@ func Md5(message string) string {
 	chunk = append(chunk, byte(0x80))
 
 	// Pre-processing: padding with zeros
-	padding := 64 - (len(message) + 1) % 64
+	padding := 56 - len(chunk) % 64
 	for i := 0; i < padding; i++ {
 		chunk = append(chunk, 0x00)
 	}
+	l := byte((len(message)  * 8) << 3)
+	chunk = append(chunk, l & 0xff)
+	chunk = append(chunk, (l >> 8)  & 0xff)
+	chunk = append(chunk, (l >> 16) & 0xff)
+	chunk = append(chunk, (l >> 24) & 0xff)
+
+	l = byte((len(message) * 8) >> (32 - 3))
+	chunk = append(chunk, l & 0xff)
+	chunk = append(chunk, (l >> 8)  & 0xff)
+	chunk = append(chunk, (l >> 16) & 0xff)
+	chunk = append(chunk, (l >> 24) & 0xff)
+
 	m := [16]uint32{}
 	x := chunk
 	xi := 0
@@ -76,7 +88,7 @@ func Md5(message string) string {
 	d := d0
 	var f uint32
 	var g int
-	for i, _ := range chunk {
+	for i := 0; i < 64; i++ {
 		if i < 16 {
 			f = uint32((b & c) | ((^b) & d))
 			g = i
@@ -101,5 +113,5 @@ func Md5(message string) string {
 	c0 += c0 + c
 	d0 += d0 + d
 
-	return fmt.Sprintf("%x%x%x%x", a0, b0, c0, d0)
+	return fmt.Sprintf("%02x%02x%02x%02x", a0, b0, c0, d0)
 }
